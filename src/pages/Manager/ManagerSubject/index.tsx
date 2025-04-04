@@ -50,7 +50,7 @@ const columns: GridColDef[] = [
     { field: 'updateAt', headerName: 'Ngày cập nhật', width: 100 },
 ];
 
-export default function ManagerLecturer() {
+export default function ManagerSubject() {
     const [isOpenModalAddLecturer, setIsOpenModalAddLecturer] =
         useState<boolean>(false);
     const handleEdit = (value: lecturerResponse) => {
@@ -70,7 +70,7 @@ export default function ManagerLecturer() {
             }}
         >
             <Box>
-                <TitleCustom>Quản lý giảng viên</TitleCustom>
+                <TitleCustom>Quản lý môn học</TitleCustom>
             </Box>
             <Box
                 sx={{
