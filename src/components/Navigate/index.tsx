@@ -18,14 +18,38 @@ import { nanoid } from 'nanoid';
 import { Link } from 'react-router-dom';
 const ItemMenu1: { title: string; url: string }[] = [
     {
-        title: 'Quản lý giản viên',
+        title: 'Quản lý giảng viên',
+        url: '/lecturer',
+    },
+    {
+        title: 'Quản lý Sinh viên',
+        url: '/student',
+    },
+    {
+        title: 'Quản lý khoa',
+        url: '/department',
+    },
+    {
+        title: 'Quản lý môn học',
+        url: '/subject',
+    },
+    {
+        title: 'Quản lý lớp học',
+        url: '/class',
+    },
+    {
+        title: 'Quản lý điểm số',
         url: '/lecturer',
     },
 ];
 const ItemMenu2: { title: string; url: string }[] = [
     {
         title: 'Danh sách chương trình đạo tạo',
-        url: '/lecturer',
+        url: '/training',
+    },
+    {
+        title: 'Xuát bản chương trình đào tạo',
+        url: '/training/publish',
     },
 ];
 export default function Navigate() {

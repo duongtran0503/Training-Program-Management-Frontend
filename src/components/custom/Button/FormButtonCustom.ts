@@ -26,6 +26,8 @@ export const FormButtonCustom = styled(Button)`
         display: flex;
         justify-content: space-between;
         align-items: center;
+        text-align: center;
+        padding: 0;
         background: linear-gradient(
             90deg,
             transparent,

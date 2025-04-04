@@ -1,15 +1,15 @@
 import { Box, Button } from '@mui/material';
-import { styledSystem } from '../../../constans/styled';
-import { TitleCustom } from '../../../components/custom/Title';
-import { FormButtonCustom } from '../../../components/custom/Button/FormButtonCustom';
+import { styledSystem } from '../../constans/styled';
+import { TitleCustom } from '../../components/custom/Title';
+import { FormButtonCustom } from '../../components/custom/Button/FormButtonCustom';
 import AddIcon from '@mui/icons-material/Add';
-import { FormInputCustom } from '../../../components/custom/Input/FormInputCustom';
-import DataTable from '../../../components/Table';
+import { FormInputCustom } from '../../components/custom/Input/FormInputCustom';
+import DataTable from '../../components/Table';
 import { GridColDef } from '@mui/x-data-grid';
-import { lecturerResponse } from '../../../schemas/API/lecturerResposne';
+import { lecturerResponse } from '../../schemas/API/lecturerResposne';
 import { useState } from 'react';
-import ModalWrapper from '../../../components/Modal/ModalWrapper';
-import FormAddLecturer from '../../../components/Modal/FormAddLecturer';
+import ModalWrapper from '../../components/Modal/ModalWrapper';
+import FormAddLecturer from '../../components/Modal/FormAddLecturer';
 
 const rows: lecturerResponse[] = [
     {
@@ -50,7 +50,7 @@ const columns: GridColDef[] = [
     { field: 'updateAt', headerName: 'Ngày cập nhật', width: 100 },
 ];
 
-export default function ManagerLecturer() {
+export default function TrainingPublish() {
     const [isOpenModalAddLecturer, setIsOpenModalAddLecturer] =
         useState<boolean>(false);
     const handleEdit = (value: lecturerResponse) => {
@@ -70,7 +70,7 @@ export default function ManagerLecturer() {
             }}
         >
             <Box>
-                <TitleCustom>Quản lý giảng viên</TitleCustom>
+                <TitleCustom>Xuất bản chương trình đào tạo</TitleCustom>
             </Box>
             <Box
                 sx={{
