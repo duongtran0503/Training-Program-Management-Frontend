@@ -9,7 +9,9 @@ export const isAuthenticated = (): boolean => {
     if (token) {
         return true;
     }
-    return true;
+    const require_login: boolean =
+        import.meta.env.VITE_REQUIRE_LOGIN === 'false';
+    return require_login;
 };
 export default function Authentication({
     element: Component,

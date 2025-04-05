@@ -22,34 +22,34 @@ const ItemMenu1: { title: string; url: string }[] = [
         url: '/lecturer',
     },
     {
-        title: 'Quản lý Sinh viên',
-        url: '/student',
-    },
-    {
         title: 'Quản lý khoa',
         url: '/department',
     },
     {
-        title: 'Quản lý môn học',
+        title: 'Quản lý học phần và đề cương học phần',
         url: '/subject',
     },
     {
         title: 'Quản lý lớp học',
         url: '/class',
     },
-    {
-        title: 'Quản lý điểm số',
-        url: '/lecturer',
-    },
 ];
 const ItemMenu2: { title: string; url: string }[] = [
     {
-        title: 'Danh sách chương trình đạo tạo',
+        title: 'Quản lý chương trình đạo tạo',
         url: '/training',
     },
     {
-        title: 'Xuát bản chương trình đào tạo',
-        url: '/training/publish',
+        title: 'Quản lý phân công giảng dạy',
+        url: '/training',
+    },
+    {
+        title: 'Quản lý Kế hoạch dạy học',
+        url: '/training',
+    },
+    {
+        title: 'Quản lý Kế hoạch mở nhóm ',
+        url: '/training',
     },
 ];
 export default function Navigate() {

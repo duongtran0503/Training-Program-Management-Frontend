@@ -23,7 +23,7 @@ export default function Header() {
                     style={{ width: '60px', height: '60px' }}
                 />
                 <Typography sx={{ fontWeight: '500' }}>
-                    Training program management
+                    Quản Lý Chương Trình Đạo Tạo
                 </Typography>
             </Box>
             <Box>
