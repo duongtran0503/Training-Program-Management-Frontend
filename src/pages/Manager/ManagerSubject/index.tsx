@@ -1,63 +1,69 @@
-import { Box, Button } from '@mui/material';
-import { styledSystem } from '../../../constans/styled';
-import { TitleCustom } from '../../../components/custom/Title';
-import { FormButtonCustom } from '../../../components/custom/Button/FormButtonCustom';
 import AddIcon from '@mui/icons-material/Add';
-import { FormInputCustom } from '../../../components/custom/Input/FormInputCustom';
-import DataTable from '../../../components/Table';
+import { Box, Button } from '@mui/material';
 import { GridColDef } from '@mui/x-data-grid';
-import { lecturerResponse } from '../../../schemas/API/lecturerResposne';
 import { useState } from 'react';
+import { FormButtonCustom } from '../../../components/custom/Button/FormButtonCustom';
+import { FormInputCustom } from '../../../components/custom/Input/FormInputCustom';
+import { TitleCustom } from '../../../components/custom/Title';
+import FormAddSubject from '../../../components/Modal/FormAddSubject';
 import ModalWrapper from '../../../components/Modal/ModalWrapper';
-import FormAddLecturer from '../../../components/Modal/FormAddLecturer';
+import DataTable from '../../../components/Table';
+import { styledSystem } from '../../../constans/styled';
 
-const rows: lecturerResponse[] = [
+export interface HocPhanResponse {
+    id: number;
+    maHp: string;
+    tenHp: string;
+    soTinChi: number;
+    soTietLyThuyet: number;
+    soTietThucHanh: number;
+    soTietThucTap: number;
+    heSo: number;
+}
+//  data
+const rows: HocPhanResponse[] = [
     {
-        id: '123123',
-        role: 'lecturer',
-        avatar: 'sdf',
-        name: 'nguyen van a',
-        lecturerCode: '123123',
-        isMale: true,
-        status: true,
-        dob: '2000-10-10',
-        startDateOfTeaching: '2000-10-10',
-        endDateOfTeaching: '2000-10-10',
-        createAt: '2000-10-10',
-        updateAt: '2000-10-10',
+        id: 1,
+        maHp: 'CS101',
+        tenHp: 'Nhập môn lập trình',
+        soTinChi: 3,
+        soTietLyThuyet: 30,
+        soTietThucHanh: 15,
+        soTietThucTap: 0,
+        heSo: 1.0,
+    },
+    {
+        id: 2,
+        maHp: 'CS202',
+        tenHp: 'Cấu trúc dữ liệu',
+        soTinChi: 4,
+        soTietLyThuyet: 45,
+        soTietThucHanh: 30,
+        soTietThucTap: 10,
+        heSo: 1.2,
     },
 ];
+
 const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 70, hideable: true },
-    { field: 'role', headerName: 'role', width: 70, hideable: true },
-    {
-        field: 'avatar',
-        headerName: 'avatar',
-        width: 100,
-    },
-    { field: 'name', headerName: 'Tên', width: 100 },
-    { field: 'lecturerCode', headerName: 'Mã giảng viên', width: 100 },
-    { field: 'isMale', headerName: 'Giới tính nam', width: 70 },
-    { field: 'status', headerName: 'Đang công tác', width: 70 },
-    { field: 'dob', headerName: 'Ngày sinh', width: 100 },
-    {
-        field: 'startDateOfTeaching',
-        headerName: 'Ngày bắt vào trường',
-        width: 100,
-    },
-    { field: 'endDateOfTeaching', headerName: 'Ngày rời trường', width: 100 },
-    { field: 'craeteAt', headerName: 'Ngày tạo', width: 100 },
-    { field: 'updateAt', headerName: 'Ngày cập nhật', width: 100 },
+    { field: 'id', headerName: 'ID', width: 70 },
+    { field: 'maHp', headerName: 'Mã học phần', width: 150 },
+    { field: 'tenHp', headerName: 'Tên học phần', width: 200 },
+    { field: 'soTinChi', headerName: 'Số tín chỉ', width: 100 },
+    { field: 'soTietLyThuyet', headerName: 'LT', width: 80 },
+    { field: 'soTietThucHanh', headerName: 'TH', width: 80 },
+    { field: 'soTietThucTap', headerName: 'TT', width: 80 },
+    { field: 'heSo', headerName: 'Hệ số', width: 80 },
 ];
 
 export default function ManagerSubject() {
-    const [isOpenModalAddLecturer, setIsOpenModalAddLecturer] =
-        useState<boolean>(false);
-    const handleEdit = (value: lecturerResponse) => {
-        console.log(value.id);
+    const [isOpenModalAddSubject, setIsOpenModalAddSubject] = useState(false);
+
+    const handleEdit = (value: HocPhanResponse) => {
+        console.log('Edit:', value);
     };
-    const handleDelete = (value: lecturerResponse) => {
-        console.log(value);
+
+    const handleDelete = (value: HocPhanResponse) => {
+        console.log('Delete:', value);
     };
 
     return (
@@ -70,7 +76,7 @@ export default function ManagerSubject() {
             }}
         >
             <Box>
-                <TitleCustom>Quản lý môn học</TitleCustom>
+                <TitleCustom>Quản lý học phần</TitleCustom>
             </Box>
             <Box
                 sx={{
@@ -80,39 +86,23 @@ export default function ManagerSubject() {
                     marginTop: '10px',
                 }}
             >
-                <Box>
-                    <FormInputCustom
-                        sx={{ width: '300px' }}
-                        placeholder='search...'
-                    />
-                </Box>
-                <Box
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        columnGap: '10px',
-                    }}
-                >
+                <FormInputCustom
+                    sx={{ width: '300px' }}
+                    placeholder="Tìm kiếm mã hoặc tên học phần..."
+                />
+                <Box sx={{ display: 'flex', alignItems: 'center', columnGap: '10px' }}>
                     <FormButtonCustom
-                        sx={{
-                            width: '100px',
-                            height: '35px',
-                            fontSize: '12px',
-                            display: 'flex',
-                            alignItems: 'center',
-                        }}
+                        sx={{ width: '100px', height: '35px', fontSize: '12px' }}
                         startIcon={<AddIcon />}
-                        onClick={() => setIsOpenModalAddLecturer(true)}
+                        onClick={() => setIsOpenModalAddSubject(true)}
                     >
                         Thêm
                     </FormButtonCustom>
                     <ModalWrapper
-                        open={isOpenModalAddLecturer}
-                        handleClose={() => setIsOpenModalAddLecturer(false)}
+                        open={isOpenModalAddSubject}
+                        handleClose={() => setIsOpenModalAddSubject(false)}
                     >
-                        <FormAddLecturer
-                            handlClose={() => setIsOpenModalAddLecturer(false)}
-                        />
+                        <FormAddSubject handleClose={() => setIsOpenModalAddSubject(false)} />
                     </ModalWrapper>
                     <Button
                         sx={{
@@ -121,23 +111,16 @@ export default function ManagerSubject() {
                             borderRadius: '10px',
                         }}
                     >
-                        Export file excel
+                        Export file Excel
                     </Button>
                 </Box>
             </Box>
+
             <Box sx={{ marginTop: '10px' }}>
-                <DataTable<lecturerResponse>
+                <DataTable<HocPhanResponse>
                     columns={columns}
                     data={rows}
                     paginationModel={{ page: 0, pageSize: 5 }}
-                    initialState={{
-                        columns: {
-                            columnVisibilityModel: {
-                                id: false,
-                                role: false,
-                            },
-                        },
-                    }}
                     handleEdit={handleEdit}
                     handleDelete={handleDelete}
                 />
