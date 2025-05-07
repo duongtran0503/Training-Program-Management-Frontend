@@ -1,5 +1,6 @@
 import { Box, Button, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { TitleCustom } from '../custom/Title';
 
 type CoursePayload = {
     courseCode: string;
@@ -55,6 +56,9 @@ export default function FormEditCourse({ handlClose, onSubmit, courseData }: Pro
                 borderRadius: '1rem',
             }}
         >
+            <Box>
+                <TitleCustom>Cập nhật học phần</TitleCustom>
+            </Box>
             <TextField label="Mã môn học" name="courseCode" value={form.courseCode} onChange={handleChange} disabled />
             <TextField label="Tên môn học" name="courseName" value={form.courseName ?? ''} onChange={handleChange} />
             <TextField label="Số tín chỉ" name="credits" type="number" value={form.credits} onChange={handleChange} />

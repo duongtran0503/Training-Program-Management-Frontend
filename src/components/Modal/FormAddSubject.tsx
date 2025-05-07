@@ -1,5 +1,6 @@
 import { Box, Button, TextField } from '@mui/material';
 import { useState } from 'react';
+import { TitleCustom } from '../custom/Title';
 
 type CoursePayload = {
     courseCode: string;
@@ -56,6 +57,9 @@ export default function FormAddCourse({ handlClose, onSubmit }: Props) {
                 borderRadius: '1rem',
             }}
         >
+            <Box>
+                <TitleCustom>Thêm học phần</TitleCustom>
+            </Box>
             <Box
                 display="flex"
                 flexDirection="column"
