@@ -1,22 +1,22 @@
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import { Box, IconButton } from '@mui/material';
+import Paper from '@mui/material/Paper';
 import {
     DataGrid,
     GridColDef,
     GridInitialState,
     GridValidRowModel,
 } from '@mui/x-data-grid';
-import Paper from '@mui/material/Paper';
-import { Box, IconButton } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { lecturerResponse } from '../../schemas/API/lecturerResposne';
 interface Props<T extends GridValidRowModel> {
     columns: GridColDef[];
     data: T[];
     paginationModel: { page: number; pageSize: number };
     initialState?: GridInitialState;
-    handleEdit: (data: lecturerResponse) => void;
-    handleDelete: (data: lecturerResponse) => void;
+    handleEdit: (data: T) => void;
+    handleDelete: (data: T) => void;
 }
+
 
 export default function DataTable<T extends GridValidRowModel>(
     props: Props<T>

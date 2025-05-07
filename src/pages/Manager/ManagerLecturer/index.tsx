@@ -1,15 +1,15 @@
-import { Box, Button } from '@mui/material';
-import { styledSystem } from '../../../constans/styled';
-import { TitleCustom } from '../../../components/custom/Title';
-import { FormButtonCustom } from '../../../components/custom/Button/FormButtonCustom';
 import AddIcon from '@mui/icons-material/Add';
-import { FormInputCustom } from '../../../components/custom/Input/FormInputCustom';
-import DataTable from '../../../components/Table';
+import { Box, Button } from '@mui/material';
 import { GridColDef } from '@mui/x-data-grid';
-import { lecturerResponse } from '../../../schemas/API/lecturerResposne';
 import { useState } from 'react';
-import ModalWrapper from '../../../components/Modal/ModalWrapper';
+import { FormButtonCustom } from '../../../components/custom/Button/FormButtonCustom';
+import { FormInputCustom } from '../../../components/custom/Input/FormInputCustom';
+import { TitleCustom } from '../../../components/custom/Title';
 import FormAddLecturer from '../../../components/Modal/FormAddLecturer';
+import ModalWrapper from '../../../components/Modal/ModalWrapper';
+import DataTable from '../../../components/Table';
+import { styledSystem } from '../../../constans/styled';
+import { lecturerResponse } from '../../../schemas/API/lecturerResposne';
 
 const rows: lecturerResponse[] = [
     {
