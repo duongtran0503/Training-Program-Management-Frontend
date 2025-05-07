@@ -1,337 +1,95 @@
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material';
+import { Box, Button, TextField } from '@mui/material';
 import { useState } from 'react';
-import { styledSystem } from '../../constans/styled';
+import { TitleCustom } from '../custom/Title';
 
-interface Props {
-    handleClose: () => void;
-}
+type CoursePayload = {
+    courseCode: string;
+    courseName: string;
+    credits: number;
+    description: string;
+    status: boolean;
+    prerequisites: string[]; // list of course codes
+};
 
-export default function FormAddSubject({ handleClose }: Props) {
-    const [formData, setFormData] = useState({
-        subjectCode: '',
-        subjectName: '',
+type Props = {
+    handlClose: () => void;
+    onSubmit: (data: CoursePayload) => void;
+};
+
+export default function FormAddCourse({ handlClose, onSubmit }: Props) {
+    const [form, setForm] = useState<CoursePayload>({
+        courseCode: '',
+        courseName: '',
         credits: 0,
-        theoryHours: 0,
-        practiceHours: 0,
-        internshipHours: 0,
-        coefficient: 1.0,
-        department: '',
-        semester: '',
+        description: '',
         status: true,
-        createAt: new Date().toISOString().slice(0, 10),
-        updateAt: new Date().toISOString().slice(0, 10),
+        prerequisites: [],
     });
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value, type } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'number' ? parseFloat(value) : value,
-            updateAt: new Date().toISOString().slice(0, 10),
-        }));
-    };
-
-    const handleSelectChange = (e: SelectChangeEvent<string>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
+        setForm(prev => ({
             ...prev,
-            [name]: value,
-            updateAt: new Date().toISOString().slice(0, 10),
+            [name]: name === 'credits' ? parseInt(value) : value,
         }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsSubmitting(true);
+    const handlePrerequisitesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const codes = e.target.value.split(',').map(code => code.trim());
+        setForm(prev => ({ ...prev, prerequisites: codes }));
+    };
 
-        try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Form submitted:', formData);
-            handleClose();
-        } finally {
-            setIsSubmitting(false);
-        }
+    const handleSubmit = () => {
+        onSubmit(form);
+        handlClose();
     };
 
     return (
         <Box
+            display="flex"
+            flexDirection="column"
+            gap={2}
+            p={3}
+            width="600px"
+            boxShadow={3}
             sx={{
-                width: { xs: '90%', sm: '600px' },
-                maxWidth: '100%',
-                maxHeight: '90vh',
-                overflowY: 'auto',
-                padding: '24px',
-                background: 'white',
-                borderRadius: '12px',
-                boxShadow: styledSystem.primaryBoxShadow,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 3,
+                bgcolor: 'white',
+                borderRadius: '1rem',
             }}
         >
-            <Typography variant="h5" sx={{
-                fontWeight: 600,
-                color: 'primary.main',
-                borderBottom: '1px solid',
-                borderColor: 'divider',
-                pb: 2,
-                mb: 1
-            }}>
-                Thêm Môn Học Mới
-            </Typography>
+            <Box>
+                <TitleCustom>Thêm học phần</TitleCustom>
+            </Box>
+            <Box
+                display="flex"
+                flexDirection="column"
+                gap={2}
+                sx={{
+                    maxHeight: '400px',
+                    overflowY: 'auto',
+                    pr: 1,
+                }}
+            >
+                <TextField label="Mã môn học" name="courseCode" value={form.courseCode} onChange={handleChange} />
+                <TextField label="Tên môn học" name="courseName" value={form.courseName} onChange={handleChange} />
+                <TextField label="Số tín chỉ" name="credits" type="number" value={form.credits} onChange={handleChange} />
+                <TextField label="Mô tả" name="description" value={form.description} multiline rows={3} onChange={handleChange} />
+                <TextField
+                    label="Môn học tiên quyết (mã), cách nhau bởi dấu phẩy"
+                    name="prerequisites"
+                    value={form.prerequisites.join(', ')}
+                    onChange={handlePrerequisitesChange}
+                />
+            </Box>
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                {/* Basic Information Section */}
-                <Box sx={{
-                    backgroundColor: '#f8f9fa',
-                    p: 3,
-                    borderRadius: '8px',
-                    borderLeft: '4px solid',
-                    borderColor: 'primary.main'
-                }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-                        Thông Tin Cơ Bản
-                    </Typography>
-
-                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-                        <TextField
-                            label="Mã Học Phần*"
-                            name="subjectCode"
-                            value={formData.subjectCode}
-                            onChange={handleInputChange}
-                            fullWidth
-                            required
-                            size="small"
-                            variant="outlined"
-                            sx={{ backgroundColor: 'white' }}
-                        />
-
-                        <TextField
-                            label="Tên Môn Học*"
-                            name="subjectName"
-                            value={formData.subjectName}
-                            onChange={handleInputChange}
-                            fullWidth
-                            required
-                            size="small"
-                            variant="outlined"
-                            sx={{ backgroundColor: 'white' }}
-                        />
-
-                        <TextField
-                            label="Số Tín Chỉ*"
-                            name="credits"
-                            type="number"
-                            value={formData.credits}
-                            onChange={handleInputChange}
-                            fullWidth
-                            required
-                            size="small"
-                            variant="outlined"
-                            inputProps={{ min: 0, step: 0.5 }}
-                            sx={{ backgroundColor: 'white' }}
-                        />
-
-                        <FormControl fullWidth size="small" sx={{ backgroundColor: 'white' }}>
-                            <InputLabel>Khoa/Bộ Môn*</InputLabel>
-                            <Select
-                                label="Khoa/Bộ Môn*"
-                                name="department"
-                                value={formData.department}
-                                onChange={handleSelectChange}
-                                required
-                            >
-                                <MenuItem value="CNTT">Công nghệ Thông tin</MenuItem>
-                                <MenuItem value="DTVT">Điện tử Viễn thông</MenuItem>
-                                <MenuItem value="QTKD">Quản trị Kinh doanh</MenuItem>
-                                <MenuItem value="NN">Ngôn ngữ</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Box>
-                </Box>
-
-                {/* Hours Information Section */}
-                <Box sx={{
-                    backgroundColor: '#f8f9fa',
-                    p: 3,
-                    borderRadius: '8px',
-                    borderLeft: '4px solid',
-                    borderColor: 'secondary.main'
-                }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-                        Thông Tin Giờ Học
-                    </Typography>
-
-                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-                        <TextField
-                            label="Số Tiết Lý Thuyết"
-                            name="theoryHours"
-                            type="number"
-                            value={formData.theoryHours}
-                            onChange={handleInputChange}
-                            fullWidth
-                            size="small"
-                            variant="outlined"
-                            inputProps={{ min: 0 }}
-                            sx={{ backgroundColor: 'white' }}
-                        />
-
-                        <TextField
-                            label="Số Tiết Thực Hành"
-                            name="practiceHours"
-                            type="number"
-                            value={formData.practiceHours}
-                            onChange={handleInputChange}
-                            fullWidth
-                            size="small"
-                            variant="outlined"
-                            inputProps={{ min: 0 }}
-                            sx={{ backgroundColor: 'white' }}
-                        />
-
-                        <TextField
-                            label="Số Tiết Thực Tập"
-                            name="internshipHours"
-                            type="number"
-                            value={formData.internshipHours}
-                            onChange={handleInputChange}
-                            fullWidth
-                            size="small"
-                            variant="outlined"
-                            inputProps={{ min: 0 }}
-                            sx={{ backgroundColor: 'white' }}
-                        />
-
-                        <TextField
-                            label="Hệ Số"
-                            name="coefficient"
-                            type="number"
-                            value={formData.coefficient}
-                            onChange={handleInputChange}
-                            fullWidth
-                            size="small"
-                            variant="outlined"
-                            inputProps={{ min: 0.1, step: 0.1, max: 2.0 }}
-                            sx={{ backgroundColor: 'white' }}
-                        />
-                    </Box>
-                </Box>
-
-                {/* Semester Information */}
-                <Box sx={{
-                    backgroundColor: '#f8f9fa',
-                    p: 3,
-                    borderRadius: '8px',
-                    borderLeft: '4px solid',
-                    borderColor: 'info.main'
-                }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-                        Thông Tin Học Kỳ
-                    </Typography>
-
-                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-                        <FormControl fullWidth size="small" sx={{ backgroundColor: 'white' }}>
-                            <InputLabel>Học Kỳ*</InputLabel>
-                            <Select
-                                label="Học Kỳ*"
-                                name="semester"
-                                value={formData.semester}
-                                onChange={handleSelectChange}
-                                required
-                            >
-                                <MenuItem value="HK1">Học kỳ 1</MenuItem>
-                                <MenuItem value="HK2">Học kỳ 2</MenuItem>
-                                <MenuItem value="HK3">Học kỳ hè</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Box>
-                </Box>
-
-                {/* System Information */}
-                <Box sx={{
-                    backgroundColor: '#f8f9fa',
-                    p: 3,
-                    borderRadius: '8px',
-                    borderLeft: '4px solid',
-                    borderColor: 'grey.500'
-                }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-                        Thông Tin Hệ Thống
-                    </Typography>
-
-                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-                        <TextField
-                            label="Ngày Tạo"
-                            name="createAt"
-                            value={formData.createAt}
-                            type="date"
-                            InputLabelProps={{ shrink: true }}
-                            fullWidth
-                            disabled
-                            size="small"
-                            sx={{ backgroundColor: '#f0f0f0' }}
-                        />
-
-                        <TextField
-                            label="Ngày Cập Nhật"
-                            name="updateAt"
-                            value={formData.updateAt}
-                            type="date"
-                            InputLabelProps={{ shrink: true }}
-                            fullWidth
-                            disabled
-                            size="small"
-                            sx={{ backgroundColor: '#f0f0f0' }}
-                        />
-                    </Box>
-                </Box>
-
-                {/* Action Buttons */}
-                <Box sx={{
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    gap: 2,
-                    pt: 2,
-                    borderTop: '1px solid',
-                    borderColor: 'divider'
-                }}>
-                    <Button
-                        variant="outlined"
-                        onClick={handleClose}
-                        sx={{
-                            minWidth: '100px',
-                            color: 'text.secondary',
-                            borderColor: 'grey.400',
-                            '&:hover': {
-                                borderColor: 'grey.600',
-                            }
-                        }}
-                    >
-                        Hủy Bỏ
-                    </Button>
-                    <Button
-                        variant="contained"
-                        type="submit"
-                        disabled={isSubmitting}
-                        sx={{
-                            minWidth: '100px',
-                            backgroundColor: 'primary.main',
-                            '&:hover': {
-                                backgroundColor: 'primary.dark',
-                            },
-                            '&:disabled': {
-                                backgroundColor: 'action.disabledBackground',
-                                color: 'action.disabled'
-                            }
-                        }}
-                    >
-                        {isSubmitting ? 'Đang Lưu...' : 'Lưu Thông Tin'}
-                    </Button>
-                </Box>
-            </form>
+            <Box display="flex" justifyContent="flex-end" gap={2} mt={2}>
+                <Button onClick={handlClose} variant="outlined" color="secondary">
+                    Đóng
+                </Button>
+                <Button onClick={handleSubmit} variant="contained" color="primary">
+                    Lưu
+                </Button>
+            </Box>
         </Box>
     );
 }

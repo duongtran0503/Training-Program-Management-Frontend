@@ -2,7 +2,19 @@ import { Box, Button, Checkbox, FormControl, FormControlLabel, InputLabel, MenuI
 import { useEffect, useState } from 'react';
 import { styledSystem } from '../../constans/styled';
 
-interface Props {
+type LecturerPayload = {
+    name: string;
+    lecturerCode: string;
+    gender: string;
+    titleAcademicRank: string;
+    avatar: string;
+    department: string;
+    status: boolean;
+    dob: string;
+    startDateOfTeaching: string;
+};
+
+type Props = {
     handlClose: () => void;
 }
 
@@ -91,6 +103,12 @@ export default function FormAddLecturer({ handlClose }: Props) {
 
     return (
         <Box
+            display="flex"
+            flexDirection="column"
+            gap={2}
+            p={3}
+            width="600px"
+            boxShadow={3}
             sx={{
                 width: { xs: '90%', sm: '600px' },
                 maxWidth: '100%',
