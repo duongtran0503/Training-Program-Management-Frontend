@@ -106,12 +106,13 @@ export default function ManagerLecturer() {
             setIsOpenModalEditLecturer(true); // Open the modal
     };
     
-    const handleDelete = (lecturer: LecturerPayload) => {
-        if (selectedLecturer) {
+    const handleDelete = (id: string) => {
+        const lecturer = lecturers.find((l) => l.id === id);
+        if (lecturer) {
             setSelectedLecturer(lecturer);
             handleSaveDelete();
         }
-    };
+    };    
 
     const fetchLecturers = async () => {
         try {
