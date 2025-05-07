@@ -8,14 +8,15 @@ import Paper from '@mui/material/Paper';
 import { Box, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { lecturerResponse } from '../../schemas/API/lecturerResposne';
+import { LecturerResponse } from '../../schemas/API/lecturerResposne';
 interface Props<T extends GridValidRowModel> {
     columns: GridColDef[];
     data: T[];
+    loading?: boolean;
     paginationModel: { page: number; pageSize: number };
     initialState?: GridInitialState;
-    handleEdit: (data: lecturerResponse) => void;
-    handleDelete: (data: lecturerResponse) => void;
+    handleEdit: (data: LecturerResponse) => void;
+    handleDelete: (data: LecturerResponse) => void;
 }
 
 export default function DataTable<T extends GridValidRowModel>(
@@ -24,6 +25,7 @@ export default function DataTable<T extends GridValidRowModel>(
     const {
         columns,
         data,
+        loading = false,
         paginationModel,
         initialState,
         handleDelete,
@@ -66,6 +68,7 @@ export default function DataTable<T extends GridValidRowModel>(
             <DataGrid
                 rows={data}
                 columns={fields}
+                loading={loading}
                 initialState={{
                     pagination: { paginationModel },
                     ...initialState,

@@ -1,14 +1,16 @@
-export interface lecturerResponse {
+export interface LecturerResponse {
     id: string;
-    avatar: string;
     role: string;
     name: string;
     lecturerCode: string;
-    isMale: boolean;
+    gender: string;  // Changed to 'gender' instead of 'isMale'
+    titleAcademicRank: string;
+    avatar: string;
+    department: string;
     status: boolean;
     dob: string;
     startDateOfTeaching: string;
-    endDateOfTeaching: string;
+    endDateOfTeaching: string | null;  // Adjusted for null value
     createAt: string;
     updateAt: string;
 }
