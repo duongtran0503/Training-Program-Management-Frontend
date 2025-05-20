@@ -9,7 +9,7 @@ import { GridColDef } from '@mui/x-data-grid';
 import { lecturerResponse } from '../../../schemas/API/lecturerResposne';
 import { useState } from 'react';
 import ModalWrapper from '../../../components/Modal/ModalWrapper';
-import FormAddLecturer from '../../../components/Modal/FormAddLecturer';
+import FormAddLecturer from '../../../components/Modal/FormAddLecturer/index';
 
 const rows: lecturerResponse[] = [
     {

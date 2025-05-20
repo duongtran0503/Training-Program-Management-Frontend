@@ -4,11 +4,12 @@ export interface lecturerResponse {
     role: string;
     name: string;
     lecturerCode: string;
-    isMale: boolean;
+    gender: string;
+    titleAcademicRank: string;
     status: boolean;
     dob: string;
     startDateOfTeaching: string;
-    endDateOfTeaching: string;
-    createAt: string;
-    updateAt: string;
+    endDateOfTeaching: string | null;
+    createdAt: string;
+    updatedAt: string;
 }

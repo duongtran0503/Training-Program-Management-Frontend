@@ -1,69 +1,148 @@
-import AddIcon from '@mui/icons-material/Add';
-import { Box, Button } from '@mui/material';
-import { GridColDef } from '@mui/x-data-grid';
-import { useState } from 'react';
-import { FormButtonCustom } from '../../../components/custom/Button/FormButtonCustom';
-import { FormInputCustom } from '../../../components/custom/Input/FormInputCustom';
-import { TitleCustom } from '../../../components/custom/Title';
-import FormAddSubject from '../../../components/Modal/FormAddSubject';
-import ModalWrapper from '../../../components/Modal/ModalWrapper';
-import DataTable from '../../../components/Table';
+import { Box, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { styledSystem } from '../../../constans/styled';
+import { TitleCustom } from '../../../components/custom/Title';
+import { FormButtonCustom } from '../../../components/custom/Button/FormButtonCustom';
+import AddIcon from '@mui/icons-material/Add';
+import { FormInputCustom } from '../../../components/custom/Input/FormInputCustom';
+import { Course } from '../../../types/course';
+import { useState, useEffect } from 'react';
+import ModalWrapper from '../../../components/Modal/ModalWrapper';
+import FormAddSubject from '../../../components/Modal/FormAddSubject';
+import FormSyllabus from '../../../components/Modal/FormSyllabus';
+import FormPrerequisites from '../../../components/Modal/FormPrerequisites';
+import { subjectServices } from '../../../services/subjectServices';
+import { courseSyllabusService } from '../../../services/courseSyllabusService';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import { Edit, Delete, Description, Visibility } from '@mui/icons-material';
+import { AxiosError } from 'axios';
 
-export interface HocPhanResponse {
-    id: number;
-    maHp: string;
-    tenHp: string;
-    soTinChi: number;
-    soTietLyThuyet: number;
-    soTietThucHanh: number;
-    soTietThucTap: number;
-    heSo: number;
+interface Syllabus {
+    id: string;
+    courseResponse: {
+        courseCode: string;
+    };
+    status: number;
 }
-//  data
-const rows: HocPhanResponse[] = [
-    {
-        id: 1,
-        maHp: 'CS101',
-        tenHp: 'Nhập môn lập trình',
-        soTinChi: 3,
-        soTietLyThuyet: 30,
-        soTietThucHanh: 15,
-        soTietThucTap: 0,
-        heSo: 1.0,
-    },
-    {
-        id: 2,
-        maHp: 'CS202',
-        tenHp: 'Cấu trúc dữ liệu',
-        soTinChi: 4,
-        soTietLyThuyet: 45,
-        soTietThucHanh: 30,
-        soTietThucTap: 10,
-        heSo: 1.2,
-    },
-];
-
-const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'maHp', headerName: 'Mã học phần', width: 150 },
-    { field: 'tenHp', headerName: 'Tên học phần', width: 200 },
-    { field: 'soTinChi', headerName: 'Số tín chỉ', width: 100 },
-    { field: 'soTietLyThuyet', headerName: 'LT', width: 80 },
-    { field: 'soTietThucHanh', headerName: 'TH', width: 80 },
-    { field: 'soTietThucTap', headerName: 'TT', width: 80 },
-    { field: 'heSo', headerName: 'Hệ số', width: 80 },
-];
 
 export default function ManagerSubject() {
     const [isOpenModalAddSubject, setIsOpenModalAddSubject] = useState(false);
+    const [isOpenModalEditSubject, setIsOpenModalEditSubject] = useState(false);
+    const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
+    const [isOpenModalSyllabus, setIsOpenModalSyllabus] = useState(false);
+    const [selectedSyllabuses, setSelectedSyllabuses] = useState<Syllabus[]>([]);
+    const [isOpenModalPrerequisites, setIsOpenModalPrerequisites] = useState(false);
+    const navigate = useNavigate();
 
-    const handleEdit = (value: HocPhanResponse) => {
-        console.log('Edit:', value);
+    useEffect(() => {
+        fetchCourses();
+    }, []);
+
+    useEffect(() => {
+        if (searchTerm.trim() === '') {
+            setFilteredCourses(courses);
+        } else {
+            const filtered = courses.filter(course => 
+                course.courseCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                course.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                course.description?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            setFilteredCourses(filtered);
+        }
+    }, [searchTerm, courses]);
+
+    const fetchCourses = async () => {
+        try {
+            const response = await subjectServices.getAllSubjects();
+            if (response.data.success && Array.isArray(response.data.data)) {
+                setCourses(response.data.data);
+                if (response.data.data.length === 0) {
+                    toast.info('Chưa có học phần nào');
+                }
+            } else {
+                console.error('Invalid response format:', response);
+                toast.error('Không thể lấy danh sách học phần');
+            }
+        } catch (error) {
+            console.error('Error fetching courses:', error);
+            if (error instanceof AxiosError) {
+                if (error.response?.status === 401) {
+                    toast.error('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
+                    navigate('/');
+                } else {
+                    toast.error('Có lỗi xảy ra khi lấy danh sách học phần');
+                }
+            }
+        }
     };
 
-    const handleDelete = (value: HocPhanResponse) => {
-        console.log('Delete:', value);
+    const handleEdit = (course: Course) => {
+        setSelectedCourse(course);
+        setIsOpenModalEditSubject(true);
+    };
+
+    const handleDelete = async (course: Course) => {
+        try {
+            await subjectServices.deleteSubject(course.courseCode);
+            toast.success('Xóa học phần thành công!');
+            fetchCourses();
+        } catch (error) {
+            console.error('Error deleting course:', error);
+            toast.error('Có lỗi xảy ra khi xóa học phần');
+        }
+    };
+
+    const handleSyllabusClick = async (course: Course) => {
+        setSelectedCourse(course);
+        try {
+            const response = await courseSyllabusService.getAllSyllabuses();
+            if (response.success) {
+                const courseSyllabuses = response.data.filter(syllabus => 
+                    syllabus.courseResponse.courseCode === course.courseCode && syllabus.status === 1
+                );
+                setSelectedSyllabuses(courseSyllabuses as any);
+                setIsOpenModalSyllabus(true);
+            }
+        } catch (error) {
+            console.error('Error fetching syllabuses:', error);
+            toast.error('Có lỗi xảy ra khi lấy danh sách đề cương');
+        }
+    };
+
+    const handlePrerequisitesClick = (course: Course) => {
+        setSelectedCourse(course);
+        setIsOpenModalPrerequisites(true);
+    };
+
+    const handleDeleteSyllabus = async (syllabusId: string) => {
+        try {
+            await courseSyllabusService.deleteSyllabus(syllabusId);
+            toast.success('Xóa đề cương thành công!');
+            const response = await courseSyllabusService.getAllSyllabuses();
+            if (response.success) {
+                const courseSyllabuses = response.data.filter(syllabus => 
+                    syllabus.courseResponse.courseCode === selectedCourse?.courseCode && syllabus.status === 1
+                );
+                setSelectedSyllabuses(courseSyllabuses as any);
+            }
+        } catch (error) {
+            console.error('Error deleting syllabus:', error);
+            toast.error('Có lỗi xảy ra khi xóa đề cương');
+        }
+    };
+
+    const handleRemovePrerequisite = async (courseCode: string, prerequisiteCode: string) => {
+        try {
+            await subjectServices.removePrerequisite(courseCode, prerequisiteCode);
+            toast.success('Xóa học phần bắt buộc thành công!');
+            fetchCourses();
+        } catch (error) {
+            console.error('Error removing prerequisite:', error);
+            toast.error('Có lỗi xảy ra khi xóa học phần bắt buộc');
+        }
     };
 
     return (
@@ -86,45 +165,166 @@ export default function ManagerSubject() {
                     marginTop: '10px',
                 }}
             >
-                <FormInputCustom
-                    sx={{ width: '300px' }}
-                    placeholder="Tìm kiếm mã hoặc tên học phần..."
-                />
-                <Box sx={{ display: 'flex', alignItems: 'center', columnGap: '10px' }}>
+                <Box>
+                    <FormInputCustom
+                        sx={{ width: '300px' }}
+                        placeholder='search...'
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </Box>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        columnGap: '10px',
+                    }}
+                >
                     <FormButtonCustom
-                        sx={{ width: '100px', height: '35px', fontSize: '12px' }}
+                        sx={{
+                            width: '100px',
+                            height: '35px',
+                            fontSize: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                        }}
                         startIcon={<AddIcon />}
                         onClick={() => setIsOpenModalAddSubject(true)}
                     >
                         Thêm
                     </FormButtonCustom>
-                    <ModalWrapper
-                        open={isOpenModalAddSubject}
-                        handleClose={() => setIsOpenModalAddSubject(false)}
-                    >
-                        <FormAddSubject handleClose={() => setIsOpenModalAddSubject(false)} />
-                    </ModalWrapper>
-                    <Button
-                        sx={{
-                            border: '1px solid gray',
-                            fontSize: '12px',
-                            borderRadius: '10px',
-                        }}
-                    >
-                        Export file Excel
-                    </Button>
                 </Box>
             </Box>
-
             <Box sx={{ marginTop: '10px' }}>
-                <DataTable<HocPhanResponse>
-                    columns={columns}
-                    data={rows}
-                    paginationModel={{ page: 0, pageSize: 5 }}
-                    handleEdit={handleEdit}
-                    handleDelete={handleDelete}
-                />
+                <TableContainer component={Paper}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Mã học phần</TableCell>
+                                <TableCell>Tên học phần</TableCell>
+                                <TableCell>Số tín chỉ</TableCell>
+                                <TableCell>Mô tả</TableCell>
+                                <TableCell>Trạng thái</TableCell>
+                                <TableCell>Thao tác</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {filteredCourses.map((course) => (
+                                <TableRow key={course.courseCode}>
+                                    <TableCell>{course.courseCode}</TableCell>
+                                    <TableCell>{course.courseName}</TableCell>
+                                    <TableCell>{course.credits}</TableCell>
+                                    <TableCell>{course.description}</TableCell>
+                                    <TableCell>{course.status ? 'Hoạt động' : 'Không hoạt động'}</TableCell>
+                                    <TableCell>
+                                        <Box sx={{ display: 'flex', gap: 1 }}>
+                                            <IconButton
+                                                color="primary"
+                                                onClick={() => handleEdit(course)}
+                                            >
+                                                <Edit />
+                                            </IconButton>
+                                            <IconButton
+                                                color="error"
+                                                onClick={() => handleDelete(course)}
+                                            >
+                                                <Delete />
+                                            </IconButton>
+                                            <IconButton
+                                                color="info"
+                                                onClick={() => handleSyllabusClick(course)}
+                                                title="Quản lý đề cương"
+                                            >
+                                                <Description />
+                                            </IconButton>
+                                            <IconButton
+                                                color="secondary"
+                                                onClick={() => handlePrerequisitesClick(course)}
+                                                title={course.prerequisites && course.prerequisites.length > 0 ? 'Xem học phần bắt buộc' : 'Thêm học phần bắt buộc'}
+                                            >
+                                                <Visibility />
+                                            </IconButton>
+                                        </Box>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
             </Box>
+
+            <ModalWrapper
+                open={isOpenModalAddSubject}
+                handleClose={() => setIsOpenModalAddSubject(false)}
+            >
+                <FormAddSubject 
+                    handleClose={() => {
+                        setIsOpenModalAddSubject(false);
+                        fetchCourses();
+                    }} 
+                />
+            </ModalWrapper>
+
+            <ModalWrapper
+                open={isOpenModalEditSubject}
+                handleClose={() => {
+                    setIsOpenModalEditSubject(false);
+                    setSelectedCourse(null);
+                }}
+            >
+                <FormAddSubject 
+                    isEdit={true}
+                    course={selectedCourse}
+                    handleClose={() => {
+                        setIsOpenModalEditSubject(false);
+                        setSelectedCourse(null);
+                        fetchCourses();
+                    }} 
+                />
+            </ModalWrapper>
+
+            <ModalWrapper
+                open={isOpenModalSyllabus}
+                handleClose={() => {
+                    setIsOpenModalSyllabus(false);
+                    setSelectedCourse(null);
+                    setSelectedSyllabuses([]);
+                }}
+            >
+                <FormSyllabus
+                    handleClose={() => {
+                        setIsOpenModalSyllabus(false);
+                        setSelectedCourse(null);
+                        setSelectedSyllabuses([]);
+                    }}
+                    courseCode={selectedCourse?.courseCode || ''}
+                    syllabuses={selectedSyllabuses}
+                    onSuccess={() => {
+                        setIsOpenModalSyllabus(false);
+                        setSelectedCourse(null);
+                        setSelectedSyllabuses([]);
+                        fetchCourses();
+                    }}
+                    onDelete={handleDeleteSyllabus}
+                />
+            </ModalWrapper>
+
+            <ModalWrapper
+                open={isOpenModalPrerequisites}
+                handleClose={() => {
+                    setIsOpenModalPrerequisites(false);
+                    setSelectedCourse(null);
+                }}
+            >
+                <FormPrerequisites
+                    course={selectedCourse}
+                    handleClose={() => {
+                        setIsOpenModalPrerequisites(false);
+                        setSelectedCourse(null);
+                    }}
+                    onRemovePrerequisite={handleRemovePrerequisite}
+                />
+            </ModalWrapper>
         </Box>
     );
 }

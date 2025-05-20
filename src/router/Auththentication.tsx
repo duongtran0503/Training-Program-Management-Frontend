@@ -6,31 +6,27 @@ import { Box } from '@mui/material';
 // eslint-disable-next-line react-refresh/only-export-components
 export const isAuthenticated = (): boolean => {
     const token = localStorage.getItem(localStorageName.token);
-    if (token) {
-        return true;
-    }
-    const require_login: boolean =
-        import.meta.env.VITE_REQUIRE_LOGIN === 'false';
-    return require_login;
+    return !!token;
 };
+
 export default function Authentication({
     element: Component,
 }: {
     element: React.ComponentType;
 }) {
-    const [isLogin, setIsLogin] = useState<boolean | null>(false);
+    const [isLogin, setIsLogin] = useState<boolean | null>(null);
+
     useEffect(() => {
-        if (isAuthenticated()) {
-            setIsLogin(true);
-        } else {
-            setIsLogin(null);
-        }
+        setIsLogin(isAuthenticated());
     }, []);
-    if (isLogin === false) {
+
+    if (isLogin === null) {
         return <Box>Loading ...</Box>;
     }
-    if (isLogin === null) {
-        return <Navigate to={'/'} replace />;
+
+    if (!isLogin) {
+        return <Navigate to="/" replace />;
     }
+
     return <Component />;
 }
