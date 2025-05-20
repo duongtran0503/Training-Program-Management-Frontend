@@ -8,7 +8,6 @@ import { FormInputCustom } from '../../../components/custom/Input/FormInputCusto
 import { FormButtonCustom } from '../../../components/custom/Button/FormButtonCustom';
 import { Link, useNavigate } from 'react-router-dom';
 import { authServices } from '../../../services/authServices';
-import { errorAPIRequest } from '../../../config/HandleAPIErrorRequst';
 import { localStorageName } from '../../../constans/localStorageName';
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -23,23 +22,40 @@ export default function LoginPage() {
     });
     const onSubmit = async (value: loginSchemaType) => {
         try {
+            console.log('Đang gửi request đăng nhập với data:', value);
             const res = await authServices.login(value);
-            console.log(res);
-            if (res.statusCode === 401) {
+            console.log('Response đăng nhập đầy đủ:', res);
+            
+            if (res.data?.token) {
+                console.log('Token nhận được:', res.data.token);
+                localStorage.setItem(localStorageName.token, res.data.token);
+                console.log('Đã lưu token vào localStorage');
+                console.log('Token trong localStorage:', localStorage.getItem(localStorageName.token));
+                
+                // Sử dụng navigate thay vì window.location
+                console.log('Đang chuyển hướng...');
+                navigate('/home', { replace: true });
+            } else {
+                console.log('Không nhận được token từ response. Response:', res);
+                setError('password', {
+                    type: 'manual',
+                    message: 'Đăng nhập thất bại',
+                });
+            }
+        } catch (error: any) {
+            console.error('Lỗi đăng nhập chi tiết:', error);
+            console.error('Response error:', error.response);
+            if (error.response?.status === 401) {
                 setError('password', {
                     type: 'manual',
                     message: 'Mật khẩu không chính xác',
                 });
             } else {
-                const token = res.data?.token;
-                localStorage.setItem(
-                    localStorageName.token,
-                    JSON.stringify(token)
-                );
-                navigate('/home');
+                setError('password', {
+                    type: 'manual',
+                    message: 'Đăng nhập thất bại',
+                });
             }
-        } catch (error) {
-            errorAPIRequest.serverError({ error });
         }
     };
     return (
