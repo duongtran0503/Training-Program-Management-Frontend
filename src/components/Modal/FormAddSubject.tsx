@@ -88,6 +88,13 @@ export default function FormAddSubject({ handleClose, isEdit = false, course }: 
         setIsSubmitting(true);
         setError(null);
 
+        // Validate form data
+        if (!formData.subjectCode || !formData.subjectName || formData.credits <= 0) {
+            setError('Vui lòng điền đầy đủ thông tin bắt buộc');
+            setIsSubmitting(false);
+            return;
+        }
+
         try {
             const description = `${formData.theoryHours} tiết lý thuyết, ${formData.practiceHours} tiết thực hành, ${formData.internshipHours} tiết thực tập, Khoa/Bộ môn: ${formData.department}`;
 
@@ -110,21 +117,18 @@ export default function FormAddSubject({ handleClose, isEdit = false, course }: 
                     status: formData.status,
                     prerequisites: []
                 };
-                await courseService.createCourse(createData);
+                console.log('Creating course with data:', createData);
+                const response = await courseService.createCourse(createData);
+                console.log('Create course response:', response);
                 toast.success('Thêm học phần thành công!');
                 handleClose();
             }
         } catch (error: any) {
             console.error('Error saving course:', error);
-            if (error.response?.status === 409) {
-                setError('Mã học phần đã tồn tại. Vui lòng chọn mã khác.');
-                toast.error('Mã học phần đã tồn tại. Vui lòng chọn mã khác.');
-            } else if (error.response?.data?.message) {
+            if (error.response?.data?.message) {
                 setError(error.response.data.message);
-                toast.error(error.response.data.message);
             } else {
-                setError('Có lỗi xảy ra. Vui lòng thử lại sau.');
-                toast.error('Có lỗi xảy ra. Vui lòng thử lại sau.');
+                setError('Có lỗi xảy ra khi lưu học phần');
             }
         } finally {
             setIsSubmitting(false);
@@ -209,7 +213,7 @@ export default function FormAddSubject({ handleClose, isEdit = false, course }: 
                             required
                             size="small"
                             variant="outlined"
-                            inputProps={{ min: 0, step: 0.5 }}
+                            inputProps={{ min: 1, step: 1 }}
                             sx={{ backgroundColor: 'white' }}
                         />
 
@@ -253,7 +257,7 @@ export default function FormAddSubject({ handleClose, isEdit = false, course }: 
                             fullWidth
                             size="small"
                             variant="outlined"
-                            inputProps={{ min: 0 }}
+                            inputProps={{ min: 0, step: 1 }}
                             sx={{ backgroundColor: 'white' }}
                         />
 
@@ -266,7 +270,7 @@ export default function FormAddSubject({ handleClose, isEdit = false, course }: 
                             fullWidth
                             size="small"
                             variant="outlined"
-                            inputProps={{ min: 0 }}
+                            inputProps={{ min: 0, step: 1 }}
                             sx={{ backgroundColor: 'white' }}
                         />
 
@@ -279,7 +283,7 @@ export default function FormAddSubject({ handleClose, isEdit = false, course }: 
                             fullWidth
                             size="small"
                             variant="outlined"
-                            inputProps={{ min: 0 }}
+                            inputProps={{ min: 0, step: 1 }}
                             sx={{ backgroundColor: 'white' }}
                         />
                     </Box>
