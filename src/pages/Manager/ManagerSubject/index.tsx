@@ -323,6 +323,9 @@ export default function ManagerSubject() {
                         setSelectedCourse(null);
                     }}
                     onRemovePrerequisite={handleRemovePrerequisite}
+                    onSuccess={() => {
+                        fetchCourses();
+                    }}
                 />
             </ModalWrapper>
         </Box>

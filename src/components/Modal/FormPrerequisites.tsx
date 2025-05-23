@@ -11,9 +11,10 @@ interface Props {
     course: Course | null;
     handleClose: () => void;
     onRemovePrerequisite: (courseCode: string, prerequisiteCode: string) => Promise<void>;
+    onSuccess?: () => void;
 }
 
-export default function FormPrerequisites({ course, handleClose, onRemovePrerequisite }: Props) {
+export default function FormPrerequisites({ course, handleClose, onRemovePrerequisite, onSuccess }: Props) {
     const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
     const [selectedPrerequisites, setSelectedPrerequisites] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,11 +25,71 @@ export default function FormPrerequisites({ course, handleClose, onRemovePrerequ
             try {
                 const response = await subjectServices.getAllSubjects();
                 if (response.data.success) {
-                    // Lọc bỏ học phần hiện tại và các học phần đã là tiên quyết
-                    const filteredCourses = response.data.data.filter(
-                        (c: Course) => c.courseCode !== course?.courseCode && 
-                        !course?.prerequisites?.some(p => p.courseCode === c.courseCode)
+                    // Lấy tất cả học phần bắt buộc của học phần hiện tại
+                    const currentPrerequisites = course?.prerequisites || [];
+                    const currentPrerequisiteCodes = currentPrerequisites.map(p => p.courseCode);
+
+                    // Tìm tất cả học phần có học phần hiện tại là học phần bắt buộc
+                    const coursesWithCurrentAsPrerequisite = response.data.data.filter(
+                        (c: Course) => c.prerequisites?.some(p => p.courseCode === course?.courseCode)
                     );
+                    const coursesWithCurrentAsPrerequisiteCodes = coursesWithCurrentAsPrerequisite.map((c: Course) => c.courseCode);
+
+                    // Tìm tất cả học phần bắt buộc của các học phần có học phần hiện tại là học phần bắt buộc
+                    const prerequisitesOfCoursesWithCurrent = coursesWithCurrentAsPrerequisite.flatMap(
+                        (c: Course) => c.prerequisites?.map(p => p.courseCode) || []
+                    );
+
+                    // Tìm tất cả học phần có học phần bắt buộc là học phần hiện tại
+                    const coursesWithCurrentAsPrerequisiteOfPrerequisite = response.data.data.filter(
+                        (c: Course) => c.prerequisites?.some(p => 
+                            response.data.data.some((otherCourse: Course) => 
+                                otherCourse.courseCode === p.courseCode && 
+                                otherCourse.prerequisites?.some(pr => pr.courseCode === course?.courseCode)
+                            )
+                        )
+                    );
+                    const coursesWithCurrentAsPrerequisiteOfPrerequisiteCodes = coursesWithCurrentAsPrerequisiteOfPrerequisite.map((c: Course) => c.courseCode);
+
+                    // Lọc bỏ các học phần không thỏa mãn điều kiện
+                    const filteredCourses = response.data.data.filter(
+                        (c: Course) => {
+                            // 1. Không thể chọn chính học phần hiện tại
+                            if (c.courseCode === course?.courseCode) return false;
+
+                            // 2. Không thể chọn học phần đã là học phần bắt buộc của học phần hiện tại
+                            if (currentPrerequisiteCodes.includes(c.courseCode)) return false;
+
+                            // 3. Không thể chọn học phần đã là học phần bắt buộc của học phần khác
+                            const isPrerequisiteOfOther = response.data.data.some(
+                                (otherCourse: Course) => 
+                                    otherCourse.courseCode !== course?.courseCode && 
+                                    otherCourse.prerequisites?.some(p => p.courseCode === c.courseCode)
+                            );
+                            if (isPrerequisiteOfOther) return false;
+
+                            // 4. Không thể chọn học phần mà học phần hiện tại là học phần bắt buộc của nó
+                            const hasCurrentCourseAsPrerequisite = c.prerequisites?.some(
+                                p => p.courseCode === course?.courseCode
+                            );
+                            if (hasCurrentCourseAsPrerequisite) return false;
+
+                            // 5. Không thể chọn học phần có học phần hiện tại là học phần bắt buộc của nó
+                            if (coursesWithCurrentAsPrerequisiteCodes.includes(c.courseCode)) return false;
+
+                            // 6. Không thể chọn học phần mà học phần bắt buộc của nó có học phần hiện tại là học phần bắt buộc
+                            const hasPrerequisiteWithCurrentAsPrerequisite = c.prerequisites?.some(
+                                p => prerequisitesOfCoursesWithCurrent.includes(p.courseCode)
+                            );
+                            if (hasPrerequisiteWithCurrentAsPrerequisite) return false;
+
+                            // 7. Không thể chọn học phần có học phần bắt buộc là học phần mà học phần hiện tại là học phần bắt buộc của nó
+                            if (coursesWithCurrentAsPrerequisiteOfPrerequisiteCodes.includes(c.courseCode)) return false;
+
+                            return true;
+                        }
+                    );
+
                     setAvailableCourses(filteredCourses);
                     if (course?.prerequisites) {
                         setCurrentPrerequisites(course.prerequisites);
@@ -54,6 +115,9 @@ export default function FormPrerequisites({ course, handleClose, onRemovePrerequ
             await subjectServices.addPrerequisites(course.courseCode, selectedPrerequisites);
             toast.success('Thêm học phần bắt buộc thành công');
             handleClose();
+            if (onSuccess) {
+                onSuccess();
+            }
         } catch (error) {
             console.error('Error adding prerequisites:', error);
             toast.error('Có lỗi xảy ra khi thêm học phần bắt buộc');
@@ -136,42 +200,48 @@ export default function FormPrerequisites({ course, handleClose, onRemovePrerequ
             )}
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <FormControl fullWidth>
-                    <InputLabel>Chọn học phần bắt buộc</InputLabel>
-                    <Select
-                        multiple
-                        value={selectedPrerequisites}
-                        onChange={(e) => setSelectedPrerequisites(e.target.value as string[])}
-                        renderValue={(selected) => (
-                            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                                {selected.map((value) => {
-                                    const course = availableCourses.find(c => c.courseCode === value);
-                                    return (
-                                        <Chip
-                                            key={value}
-                                            label={`${course?.courseName} (${course?.courseCode})`}
-                                            onDelete={() => handleDelete(value)}
-                                            color="primary"
-                                            variant="outlined"
-                                        />
-                                    );
-                                })}
-                            </Stack>
-                        )}
-                        sx={{ backgroundColor: 'white' }}
-                    >
-                        {availableCourses.map((course) => (
-                            <MenuItem key={course.courseCode} value={course.courseCode}>
-                                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                    <Typography variant="body1">{course.courseName}</Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                        Mã học phần: {course.courseCode}
-                                    </Typography>
-                                </Box>
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                {availableCourses.length > 0 ? (
+                    <FormControl fullWidth>
+                        <InputLabel>Chọn học phần bắt buộc</InputLabel>
+                        <Select
+                            multiple
+                            value={selectedPrerequisites}
+                            onChange={(e) => setSelectedPrerequisites(e.target.value as string[])}
+                            renderValue={(selected) => (
+                                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                                    {selected.map((value) => {
+                                        const course = availableCourses.find(c => c.courseCode === value);
+                                        return (
+                                            <Chip
+                                                key={value}
+                                                label={`${course?.courseName} (${course?.courseCode})`}
+                                                onDelete={() => handleDelete(value)}
+                                                color="primary"
+                                                variant="outlined"
+                                            />
+                                        );
+                                    })}
+                                </Stack>
+                            )}
+                            sx={{ backgroundColor: 'white' }}
+                        >
+                            {availableCourses.map((course) => (
+                                <MenuItem key={course.courseCode} value={course.courseCode}>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                                        <Typography variant="body1">{course.courseName}</Typography>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Mã học phần: {course.courseCode}
+                                        </Typography>
+                                    </Box>
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                ) : (
+                    <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                        Không có học phần thích hợp
+                    </Typography>
+                )}
 
                 {selectedPrerequisites.length > 0 && (
                     <Paper sx={{ p: 2, backgroundColor: '#f8f9fa' }}>
