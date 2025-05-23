@@ -6,6 +6,7 @@ import ManagerDepartment from '../pages/Manager/ManagerDepartment';
 import ManagerLecturer from '../pages/Manager/ManagerLecturer';
 import ManagerSubject from '../pages/Manager/ManagerSubject';
 import ManagerTraining from '../pages/Manager/ManagerTraining';
+import ManagerTeachingPlan from '../pages/Manager/ManagerTeachingPlan';
 import ManagerSyllabus from '../pages/Manager/ManagerSyllabus';
 import ViewSyllabus from '../pages/Manager/ManagerSubject/ViewSyllabus';
 
@@ -47,6 +48,11 @@ export const privateRouters: {
     {
         path: '/manager/training',
         element: ManagerTraining,
+        layout: Primarylayout,
+    },
+    {
+        path: '/manager/teaching-plan',
+        element: ManagerTeachingPlan,
         layout: Primarylayout,
     },
     {
