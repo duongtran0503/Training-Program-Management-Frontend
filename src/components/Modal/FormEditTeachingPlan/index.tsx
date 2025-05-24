@@ -35,7 +35,8 @@ export default function FormEditTeachingPlan({ handlClose, teachingPlan, onSucce
                 }
             } catch (error) {
                 console.error('Error fetching training programs:', error);
-                            }
+                // Optionally handle the error here, e.g., setError('Error fetching training programs');
+            }
         };
         fetchTrainingPrograms();
     }, []);
