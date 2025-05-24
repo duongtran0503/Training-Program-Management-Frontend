@@ -16,6 +16,7 @@ import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import { styledSystem } from '../../constans/styled';
 import { nanoid } from 'nanoid';
 import { Link } from 'react-router-dom';
+
 const ItemMenu1: { title: string; url: string }[] = [
     {
         title: 'Quản lý giảng viên',
@@ -23,38 +24,34 @@ const ItemMenu1: { title: string; url: string }[] = [
     },
     {
         title: 'Quản lý khoa',
-        url: '/department',
+        url: '/manager/department',
     },
     {
         title: 'Quản lý học phần và đề cương học phần',
-        url: '/subject',
+        url: '/manager/subject',
     },
     {
         title: 'Quản lý lớp học',
-        url: '/class',
+        url: '/manager/class',
     },
 ];
+
 const ItemMenu2: { title: string; url: string }[] = [
     {
-        title: 'Quản lý chương trình đạo tạo',
-        url: '/training',
+        title: 'Quản lý chương trình đào tạo',
+        url: '/manager/training',
     },
     {
-        title: 'Quản lý phân công giảng dạy',
-        url: '/training',
+        title: 'Quản lý kế hoạch đào tạo',
+        url: '/manager/teaching-plan',
     },
-    {
-        title: 'Quản lý Kế hoạch dạy học',
-        url: '/training',
-    },
-    {
-        title: 'Quản lý Kế hoạch mở nhóm ',
-        url: '/training',
-    },
+    
 ];
+
 export default function Navigate() {
     const [isOpenTreeMenu2, setisOpenTreeMenu2] = useState<boolean>(false);
     const [isOpenTreeMenu1, setIsOpenTreeMenu1] = useState<boolean>(false);
+
     return (
         <Box
             sx={{
@@ -119,7 +116,7 @@ export default function Navigate() {
                         <ListItemIcon>
                             <SchoolIcon />
                         </ListItemIcon>
-                        <ListItemText primary='Chương trình đạo tạo' />
+                        <ListItemText primary='Chương trình đào tạo' />
                         {isOpenTreeMenu2 ? <ExpandLess /> : <ExpandMore />}
                     </ListItemButton>
                     <Collapse in={isOpenTreeMenu2} timeout='auto' unmountOnExit>
@@ -132,7 +129,6 @@ export default function Navigate() {
                                         component={Link}
                                         to={item.url}
                                     >
-                                        {' '}
                                         <ListItemText primary={item.title} />
                                     </ListItemButton>
                                 );
@@ -144,7 +140,7 @@ export default function Navigate() {
                     <ListItemIcon>
                         <SupportAgentIcon />
                     </ListItemIcon>
-                    <ListItemText primary='Hổ trợ' />
+                    <ListItemText primary='Hỗ trợ' />
                 </ListItemButton>
             </Box>
         </Box>

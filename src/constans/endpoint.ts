@@ -14,4 +14,11 @@ export const endpoint = {
         prerequisites: '/courses/prerequisites',
         syllabus: '/courses/course-syllabus',
     },
+    teachingPlan: {
+        getAll: '/teaching-plans',
+        getById: '/teaching-plans',
+        create: '/teaching-plans',
+        update: '/teaching-plans',
+        delete: '/teaching-plans',
+    },
 };
